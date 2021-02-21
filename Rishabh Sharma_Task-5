@@ -1,0 +1,266 @@
+NAME:- RISHABH SHARMA
+Importing Packages
+In [1]:
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+import warnings 
+warnings.simplefilter('ignore')
+
+import plotly_express as px
+
+from plotly.offline import iplot
+import plotly as py
+import plotly.tools as tls
+import cufflinks as cf
+py.offline.init_notebook_mode(connected=True)
+cf.go_offline()
+Reading the dataset
+In [2]:
+matches = pd.read_csv('matches.csv')
+deliveries = pd.read_csv('deliveries.csv')
+In [3]:
+deliveries.head()
+Out[3]:
+match_id	inning	batting_team	bowling_team	over	ball	batsman	non_striker	bowler	is_super_over	...	bye_runs	legbye_runs	noball_runs	penalty_runs	batsman_runs	extra_runs	total_runs	player_dismissed	dismissal_kind	fielder
+0	1	1	Sunrisers Hyderabad	Royal Challengers Bangalore	1	1	DA Warner	S Dhawan	TS Mills	0	...	0	0	0	0	0	0	0	NaN	NaN	NaN
+1	1	1	Sunrisers Hyderabad	Royal Challengers Bangalore	1	2	DA Warner	S Dhawan	TS Mills	0	...	0	0	0	0	0	0	0	NaN	NaN	NaN
+2	1	1	Sunrisers Hyderabad	Royal Challengers Bangalore	1	3	DA Warner	S Dhawan	TS Mills	0	...	0	0	0	0	4	0	4	NaN	NaN	NaN
+3	1	1	Sunrisers Hyderabad	Royal Challengers Bangalore	1	4	DA Warner	S Dhawan	TS Mills	0	...	0	0	0	0	0	0	0	NaN	NaN	NaN
+4	1	1	Sunrisers Hyderabad	Royal Challengers Bangalore	1	5	DA Warner	S Dhawan	TS Mills	0	...	0	0	0	0	0	2	2	NaN	NaN	NaN
+5 rows × 21 columns
+
+In [4]:
+deliveries.rename(columns={'match_id':'id'},inplace=True)
+In [5]:
+matches.head()
+Out[5]:
+id	season	city	date	team1	team2	toss_winner	toss_decision	result	dl_applied	winner	win_by_runs	win_by_wickets	player_of_match	venue	umpire1	umpire2	umpire3
+0	1	2017	Hyderabad	2017-04-05	Sunrisers Hyderabad	Royal Challengers Bangalore	Royal Challengers Bangalore	field	normal	0	Sunrisers Hyderabad	35	0	Yuvraj Singh	Rajiv Gandhi International Stadium, Uppal	AY Dandekar	NJ Llong	NaN
+1	2	2017	Pune	2017-04-06	Mumbai Indians	Rising Pune Supergiant	Rising Pune Supergiant	field	normal	0	Rising Pune Supergiant	0	7	SPD Smith	Maharashtra Cricket Association Stadium	A Nand Kishore	S Ravi	NaN
+2	3	2017	Rajkot	2017-04-07	Gujarat Lions	Kolkata Knight Riders	Kolkata Knight Riders	field	normal	0	Kolkata Knight Riders	0	10	CA Lynn	Saurashtra Cricket Association Stadium	Nitin Menon	CK Nandan	NaN
+3	4	2017	Indore	2017-04-08	Rising Pune Supergiant	Kings XI Punjab	Kings XI Punjab	field	normal	0	Kings XI Punjab	0	6	GJ Maxwell	Holkar Cricket Stadium	AK Chaudhary	C Shamshuddin	NaN
+4	5	2017	Bangalore	2017-04-08	Royal Challengers Bangalore	Delhi Daredevils	Royal Challengers Bangalore	bat	normal	0	Royal Challengers Bangalore	15	0	KM Jadhav	M Chinnaswamy Stadium	NaN	NaN	NaN
+Merging two datasets
+In [6]:
+ipl = pd.merge(left=matches, right=deliveries, on='id', how='right')
+ipl.head()
+Out[6]:
+id	season	city	date	team1	team2	toss_winner	toss_decision	result	dl_applied	...	bye_runs	legbye_runs	noball_runs	penalty_runs	batsman_runs	extra_runs	total_runs	player_dismissed	dismissal_kind	fielder
+0	1	2017	Hyderabad	2017-04-05	Sunrisers Hyderabad	Royal Challengers Bangalore	Royal Challengers Bangalore	field	normal	0	...	0	0	0	0	0	0	0	NaN	NaN	NaN
+1	1	2017	Hyderabad	2017-04-05	Sunrisers Hyderabad	Royal Challengers Bangalore	Royal Challengers Bangalore	field	normal	0	...	0	0	0	0	0	0	0	NaN	NaN	NaN
+2	1	2017	Hyderabad	2017-04-05	Sunrisers Hyderabad	Royal Challengers Bangalore	Royal Challengers Bangalore	field	normal	0	...	0	0	0	0	4	0	4	NaN	NaN	NaN
+3	1	2017	Hyderabad	2017-04-05	Sunrisers Hyderabad	Royal Challengers Bangalore	Royal Challengers Bangalore	field	normal	0	...	0	0	0	0	0	0	0	NaN	NaN	NaN
+4	1	2017	Hyderabad	2017-04-05	Sunrisers Hyderabad	Royal Challengers Bangalore	Royal Challengers Bangalore	field	normal	0	...	0	0	0	0	0	2	2	NaN	NaN	NaN
+5 rows × 38 columns
+
+In [7]:
+print(matches.shape)
+print(deliveries.shape)
+print(ipl.shape)
+(756, 18)
+(179078, 21)
+(179078, 38)
+Droping unwanted columns
+In [8]:
+ipl.drop(columns=['umpire1','umpire2','umpire3','player_dismissed','dismissal_kind','fielder'], inplace=True)
+In [9]:
+ipl.isnull().sum()
+Out[9]:
+id                    0
+season                0
+city               1700
+date                  0
+team1                 0
+team2                 0
+toss_winner           0
+toss_decision         0
+result                0
+dl_applied            0
+winner              372
+win_by_runs           0
+win_by_wickets        0
+player_of_match     372
+venue                 0
+inning                0
+batting_team          0
+bowling_team          0
+over                  0
+ball                  0
+batsman               0
+non_striker           0
+bowler                0
+is_super_over         0
+wide_runs             0
+bye_runs              0
+legbye_runs           0
+noball_runs           0
+penalty_runs          0
+batsman_runs          0
+extra_runs            0
+total_runs            0
+dtype: int64
+Statistics on data
+In [10]:
+ipl.describe().T
+Out[10]:
+count	mean	std	min	25%	50%	75%	max
+id	179078.0	1802.252957	3472.322805	1.0	190.0	379.0	567.0	11415.0
+season	179078.0	2013.444510	3.363947	2008.0	2011.0	2013.0	2016.0	2019.0
+dl_applied	179078.0	0.017914	0.132639	0.0	0.0	0.0	0.0	1.0
+win_by_runs	179078.0	13.404036	23.261007	0.0	0.0	0.0	19.0	146.0
+win_by_wickets	179078.0	3.261579	3.347033	0.0	0.0	3.0	6.0	10.0
+inning	179078.0	1.482952	0.502074	1.0	1.0	1.0	2.0	5.0
+over	179078.0	10.162488	5.677684	1.0	5.0	10.0	15.0	20.0
+ball	179078.0	3.615587	1.806966	1.0	2.0	4.0	5.0	9.0
+is_super_over	179078.0	0.000452	0.021263	0.0	0.0	0.0	0.0	1.0
+wide_runs	179078.0	0.036721	0.251161	0.0	0.0	0.0	0.0	5.0
+bye_runs	179078.0	0.004936	0.116480	0.0	0.0	0.0	0.0	4.0
+legbye_runs	179078.0	0.021136	0.194908	0.0	0.0	0.0	0.0	5.0
+noball_runs	179078.0	0.004183	0.070492	0.0	0.0	0.0	0.0	5.0
+penalty_runs	179078.0	0.000056	0.016709	0.0	0.0	0.0	0.0	5.0
+batsman_runs	179078.0	1.246864	1.608270	0.0	0.0	1.0	1.0	7.0
+extra_runs	179078.0	0.067032	0.342553	0.0	0.0	0.0	0.0	7.0
+total_runs	179078.0	1.313897	1.605422	0.0	0.0	1.0	1.0	10.0
+No of seasons in IPL
+In [11]:
+tot_seasons = len(ipl['season'].unique())
+print('Number of seasons played in ipl:',tot_seasons)
+Number of seasons played in ipl: 12
+Number of matches in seasons
+In [12]:
+season1=matches['season'].value_counts()
+season1.iplot(kind='bar',xTitle='Year', yTitle='No of matches',title='No of matches in year.',
+         bargap=0.5,color='grey')
+Highest number of matches were held in the year 2013
+Cities in IPL data.
+In [13]:
+ipl.city.unique()
+Out[13]:
+array(['Hyderabad', 'Pune', 'Rajkot', 'Indore', 'Bangalore', 'Mumbai',
+       'Kolkata', 'Delhi', 'Chandigarh', 'Kanpur', 'Jaipur', 'Chennai',
+       'Cape Town', 'Port Elizabeth', 'Durban', 'Centurion',
+       'East London', 'Johannesburg', 'Kimberley', 'Bloemfontein',
+       'Ahmedabad', 'Cuttack', 'Nagpur', 'Dharamsala', 'Kochi',
+       'Visakhapatnam', 'Raipur', 'Ranchi', 'Abu Dhabi', 'Sharjah', nan,
+       'Mohali', 'Bengaluru'], dtype=object)
+Top 10 cities in IPL history
+In [14]:
+matches.city.value_counts()[:10]
+Out[14]:
+Mumbai        101
+Kolkata        77
+Delhi          74
+Bangalore      66
+Hyderabad      64
+Chennai        57
+Jaipur         47
+Chandigarh     46
+Pune           38
+Durban         15
+Name: city, dtype: int64
+Most of the matches were held in Mumbai city.
+No of matches played by each team in IPL.
+Concating team1 and team2 into a single column.
+In [15]:
+t1 = matches['team1']
+t2= matches['team2']
+team=[t1,t2]
+team=pd.concat(team)
+team
+Out[15]:
+0              Sunrisers Hyderabad
+1                   Mumbai Indians
+2                    Gujarat Lions
+3           Rising Pune Supergiant
+4      Royal Challengers Bangalore
+                  ...             
+751                 Mumbai Indians
+752                 Mumbai Indians
+753                 Delhi Capitals
+754            Chennai Super Kings
+755            Chennai Super Kings
+Length: 1512, dtype: object
+In [16]:
+plt.figure(figsize=[15,7])
+sns.countplot(team, order=team.value_counts().index);
+plt.xticks(rotation=65);
+
+Mumbai Indians is the team that played maximum number of matches in IPL.
+Toss winning team.
+In [17]:
+toss = matches['toss_winner'].value_counts()
+toss.iplot(kind='bar',xTitle='Team', yTitle='Tosses won',title='No of tosses won by teams.',
+         bargap=0.5,color='black')
+Mumbai Indians is the team to win most number of tosses.
+Toss decision by venue
+In [18]:
+ipl['toss_decision'].value_counts()
+plt.figure(figsize=[15,7])
+sns.countplot(x=ipl['venue'], hue=ipl['toss_decision'], order=ipl['venue'].value_counts().index);
+plt.xticks(rotation=90);
+
+MA Chidhambaram Stadium is mostly choosed for batting.
+M Chinnawamy Stadium is mostly choosed for fielding.
+Teams and their winning counts
+In [19]:
+matches['winner'].value_counts().iplot(kind='bar',xTitle='Teams',yTitle='Matches won',title='No of matches won by teams')
+Mumbai Inidians is the team to win most number of matches.
+Datas in overs.
+In [20]:
+overs = deliveries.groupby(by='over').sum()
+overs
+Out[20]:
+id	inning	ball	is_super_over	wide_runs	bye_runs	legbye_runs	noball_runs	penalty_runs	batsman_runs	extra_runs	total_runs
+over												
+1	17111970	14598	35259	81	539	52	248	32	0	8535	871	9406
+2	16735202	14248	34880	0	489	40	262	32	0	10139	823	10962
+3	16764234	14122	34273	0	392	42	231	40	0	11413	705	12118
+4	16678664	14062	34004	0	340	22	230	46	0	11769	638	12407
+5	16621283	13997	33794	0	322	32	177	34	5	11856	570	12426
+6	16492607	13966	33754	0	332	41	227	47	0	11865	647	12512
+7	16450119	13895	33525	0	362	22	200	23	0	9476	607	10083
+8	16434386	13858	33317	0	300	22	173	27	0	10215	522	10737
+9	16431313	13814	33289	0	295	44	172	20	0	10596	531	11127
+10	16480392	13728	32966	0	269	57	153	24	0	10484	503	10987
+11	16389471	13634	32688	0	216	38	156	25	0	10952	435	11387
+12	16369582	13582	32632	0	261	35	130	17	5	11206	448	11654
+13	16431049	13535	32659	0	298	68	154	22	0	11163	542	11705
+14	16280690	13365	32205	0	265	33	171	23	0	11491	492	11983
+15	16251511	13188	32050	0	294	29	148	21	0	11826	492	12318
+16	16085805	12926	31640	0	303	49	167	33	0	11987	552	12539
+17	15906735	12689	31414	0	316	30	219	67	0	12304	632	12936
+18	15736272	12174	30520	0	354	22	207	60	0	12620	643	13263
+19	14810334	11160	28570	0	334	59	186	89	0	12167	668	12835
+20	12282236	9023	24033	0	295	147	174	67	0	11222	683	11905
+Runs by overs.
+In [21]:
+overs.total_runs.iplot(kind='bar',xTitle='Overs', yTitle='Runs',title='Runs by overs',
+         color='blue')
+Most number of runs are scored in powerplay & 16-18 overs.
+wides by overs.
+In [22]:
+overs.wide_runs.iplot(kind='line',xTitle='Overs', yTitle='Wide Runs',title='Wide runs by overs',
+         color='blue')
+Most number of wide runs are given in first 3 overs.
+Man of the match
+Best player in IPL
+In [23]:
+player = matches['player_of_match'].value_counts()[:15]
+player.iplot(kind='bar',xTitle='Player Name',yTitle='No of matches',title='Best Player in IPL.', color='green')
+Chris Gayle has won the most number of Player of the match awards in IPL seasons.
+Summary
+Number of seasons played in IPL is 12.
+Highest number of matches were held in the year 2013.
+Most of the matches were held in Mumbai city.
+Mumbai Indians is the team that played maximum number of matches in IPL.
+Mumbai Indians is the team to win most number of tosses.
+Mumbai Inidians is the team to win more number of matches than other teams.
+Toss Decision:
+MA Chidhambaram Stadium is mostly choosed for batting.
+M Chinnawamy Stadium is mostly choosed for fielding.
+More runs are scored in powerplay & 16-18 overs.
+Most number of wide runs are given in first 3 overs.
+Chris Gayle has won the most number of Player of the match awards in IPL seasons.
